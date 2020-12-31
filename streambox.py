@@ -1,14 +1,18 @@
 #!/usr/bin/python3
 #
-# pip3 install keyboard python-vlc matplotlib
-# TypeError: Couldn't find foreign struct converter for 'cairo.Context
+# Installation
+# pip3 install keyboard python-vlc matplotlib certifi humanize
 
-# references:
+# References
 # https://git.videolan.org/?p=vlc/bindings/python.git;a=blob;f=examples/play_buffer.py;h=23a52f96b5367531838c28079d6263b69cab0ca9;hb=HEAD
 # API documentation: https://www.olivieraubert.net/vlc/python-ctypes/doc/
 # wiki: https://wiki.videolan.org/Python_bindings
 # keyboard: https://github.com/boppreh/keyboard#keyboard.hook
+#
+# Notes
+# set audio output: right-click on audio icon and select HDMI
 
+import sys, os
 import time
 import vlc
 import keyboard 
@@ -16,10 +20,15 @@ import sys, os
 import requests
 import shutil
 import os.path
+import threading
 
-source = "https://rk-solutions-streamc.de/hohenackerstreams/66778891-1608455300-Sunday-20-12-20-10-08.mp4"
+# scripts in utils directory
+sys.path.append(os.path.join(os.getcwd(), "utils"))
+import update
+import parse
 
 show_webcam = False
+available_files = []
 
 # callback function to handle key presses
 def key_pressed(event):
@@ -57,7 +66,7 @@ def key_pressed(event):
     livestream_url = ""
     
     # start most recent video
-    open_stream(available_streams[-1])
+    open_stream(available_files[-1])
     
   elif event.scan_code == 55:  # "snowflake"
     print("snowflake")
@@ -78,26 +87,16 @@ def key_pressed(event):
   elif event.name in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
     print("load stream")
     # get all available videos
-    available_streams = update_available_streams()
+    available_files = parse.get_available_files()
     
     number = (int)(event.name)
     
-    if len(available_streams) > number:
-      open_stream(available_streams[-1-number])
+    if len(available_files) > number:
+      open_stream(available_files[-1-number])
     else:
       print("Error, there are {} streams available, but {} was pressed".
-        format(len(available_streams), number))
+        format(len(available_files), number))
           
-def update_available_streams():
-  path = "utils/downloaded"
-  downloaded_files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
-  downloaded_files = sorted(downloaded_files)
-
-  print("available streams: {}".format(downloaded_files))
-  downloaded_files = [os.path.join(path,f) for f in downloaded_files]
-
-
-  return downloaded_files
           
 def open_stream(source):
   # load media
@@ -113,6 +112,20 @@ def open_stream(source):
   size = media_player.video_get_size() 
   print("playing {}, duration: {}, size: {}".format(source, duration, size))
           
+# start of the script
+print("streambox.py started")
+
+# download a new version of this script if available, then quit the program
+# or do nothing if there is no newer version
+update.apply_updates()
+          
+# start extra thread that downloads new videos
+try:
+  thread = threading.Thread(target = parse.download_new_videos)
+  thread.start()
+  time.sleep(2)  # wait two seconds for the checks being run
+except:
+  print("Could not start thread to download new videos.")
           
 # register callback
 keyboard.on_release(key_pressed)
