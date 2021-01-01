@@ -5,6 +5,9 @@
 # installation directory of the git repo
 install_dir=/home/pi/Streambox
 
+#. /home/pi/.profile
+#export DISPLAY=:0
+
 # compose name of log file
 logfile=$install_dir/logs/$(date +%F_%T).txt
 

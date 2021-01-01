@@ -202,8 +202,8 @@ def open_stream(source):
             
     # play the video
     media_player.play() 
-    media_player.set_fullscreen(True)
-    #media_player.set_fullscreen(False)
+    #media_player.set_fullscreen(True)
+    media_player.set_fullscreen(False)
     media_player.video_set_scale(0)   # 0 means adjust to fit
 
     # get information about the video
@@ -220,7 +220,7 @@ def show_livestream():
   subprocess.Popen("sudo -u pi chromium-browser --no-sandbox --noerrdialogs --disable-infobars --incognito --kiosk --start-fullscreen https://rk-solutions-streamc.de/hohenacker/livestream.html", shell=True)
   
   # wait for chrome to load
-  time.sleep(20)
+  time.sleep(10)
   
   # get screen resolution
   screen_width, screen_height = pyautogui.size()

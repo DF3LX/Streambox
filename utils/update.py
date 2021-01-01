@@ -38,6 +38,9 @@ def apply_updates():
   
   if current_hash != stable_version_hash:
     
+    # checkout main
+    output_checkout_main = subprocess.check_output(["git", "checkout", "main"], cwd=install_dir)
+    
     # pull
     output_pull = subprocess.check_output(["git", "pull", "origin", "main"], cwd=install_dir)
     
@@ -49,7 +52,9 @@ def apply_updates():
     except:
       checkout_successfull = False
     
-    print("--------------------------\n\033[92mgit pull origin main\033[0m")
+    print("--------------------------\n\033[92mgit checkout main\033[0m")
+    print(str(output_checkout_main))
+    print("\033[92mgit pull origin main\033[0m")
     print(str(output_pull))
     print("\033[92mgit checkout {}\033[0m".format(stable_version_hash))
     print(str(output_checkout))
