@@ -5,6 +5,10 @@ import os
 import subprocess
 import datetime
 
+# determine installation directory of Streambox, regardless of current working directory
+current_dir = os.path.dirname(os.path.realpath(__file__))
+install_dir = os.path.join(current_dir, "..")
+
 def apply_updates():
   """ This functions checks if there is a newer versions of this program
   in the git repo and if so, checks out the latest version.
@@ -25,7 +29,7 @@ def apply_updates():
     stable_version_hash = str(stable_version_hash).strip()   # remove whitespace
     
   # determine hash of checked out version
-  current_hash = subprocess.check_output(["git", "rev-parse", "HEAD"])
+  current_hash = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=install_dir)
   current_hash = current_hash.strip()   # remove whitespace
   current_hash = current_hash.decode("utf-8")
   
@@ -35,17 +39,27 @@ def apply_updates():
   if current_hash != stable_version_hash:
     
     # pull
-    output_pull = subprocess.check_output(["git", "pull", "origin", "main"])
+    output_pull = subprocess.check_output(["git", "pull", "origin", "main"], cwd=install_dir)
     
     # checkout version
-    output_checkout = str(subprocess.check_output(["git", "checkout", stable_version_hash]))
+    checkout_successfull = True
+    output_checkout = ""
+    try:
+      output_checkout = str(subprocess.check_output(["git", "checkout", stable_version_hash], cwd=install_dir))
+    except:
+      checkout_successfull = False
     
     print("--------------------------\n\033[92mgit pull origin main\033[0m")
     print(str(output_pull))
     print("\033[92mgit checkout {}\033[0m".format(stable_version_hash))
     print(str(output_checkout))
-    print("\n--------------------------\nNow exiting script such that it can be restarted.", flush=True)
-    sys.exit(0)
+    print("\n--------------------------\n")
+    
+    if checkout_successfull:
+      print("Now exiting script such that it can be restarted.", flush=True)
+      sys.exit(0)
+    else:
+      print("Checkout was not successful")
   
   else:
     print("  Version is up to date.", flush=True)

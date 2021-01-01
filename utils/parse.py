@@ -19,6 +19,16 @@ install_dir = os.path.join(current_dir, "..")
 downloaded_files_path = os.path.join(install_dir,"downloaded")
 currently_downloading_files_path = os.path.join(install_dir,"currently_downloading")
 
+def get_date_from_filename(filename):
+  components = filename.split("-")
+  year = 2000 + int(components[5])
+  month = int(components[4])
+  day = int(components[3])
+  hour = int(components[6])
+  minute = int(components[7].split(".")[0])
+  t = datetime.datetime(year, month, day, hour, minute)
+  return t
+
 def get_available_files():
   """
   return full paths of video files that are currently available locally
@@ -26,7 +36,19 @@ def get_available_files():
   
   # get all files in directory "downloaded"
   downloaded_files = [os.path.join(downloaded_files_path, f) for f in os.listdir(downloaded_files_path) if os.path.isfile(os.path.join(downloaded_files_path, f))]
-  return downloaded_files
+  
+  # sort by date in filename
+  sorted_files = sorted(downloaded_files, key=get_date_from_filename)
+  
+  return sorted_files
+
+def get_readable_date(t):
+        
+  # print datetime object in readable format
+  weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+  text = "{} {}".format(weekdays[t.weekday()], t.strftime("%d.%m.%y, %H:%M Uhr"))
+  
+  return text
 
 def parse_online_list():
   """ 
