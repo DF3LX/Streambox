@@ -6,7 +6,7 @@ import os
 import tempfile
 import datetime
 
-def show_overlay_text(text, duration_seconds, fontsize=100):
+def show_overlay_text(text, duration_seconds, fontsize=70):
   """ 
   displays an overlay text over fullscreen 
   :param text:         additional text to display
@@ -23,7 +23,7 @@ def show_overlay_text(text, duration_seconds, fontsize=100):
     f.write(text)
   
   subprocess.Popen(["osd_cat", "--pos=top", 
-    "--offset=100", "--align=left", "--indent=10", "--color=white", 
+    "--offset=100", "--align=left", "--indent=30", "--color=white", 
     "--outline=2", "--outlinecolour=blue", "--delay={}".format(int(duration_seconds)),
     "--lines=15",
     "--font=-bitstream-*-*-*-*-*-{}-*-*-*-*-*-*-*".format(int(fontsize)), temporary_filename])
@@ -40,7 +40,7 @@ def show_overlay_bar(fraction, text, duration_seconds):
   
   print("- Display overlay for {} seconds with bar at {}%: \"{}\"".format(duration_seconds, int(fraction*100), text), flush=True)
   subprocess.Popen(["osd_cat", "--pos=top", 
-    "--offset=100", "--align=left", "--indent=10", "--color=white", 
+    "--offset=100", "--align=left", "--indent=30", "--color=white", 
     "--outline=2", "--outlinecolour=blue", "--delay={}".format(int(duration_seconds)),
     "--font=-bitstream-*-*-*-*-*-40-*-*-*-*-*-*-*", 
     "--barmode=percentage", "--text={}".format(text), "--percentage={}".format(int(fraction*100))])

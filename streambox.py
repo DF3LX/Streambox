@@ -108,34 +108,14 @@ def key_pressed(event):
     elif event.name == "enter" or event.scan_code == 96:
       print("show info", flush=True)
       
-      available_files = parse.get_available_files()
+      # show the list of available files for 10s
+      show_info(10)
       
-      text_list = ""
-      fontsize = 100
-      print("  n:",len(available_files), flush=True)
-      if len(available_files) > 5:
-        fontsize = 50
-        
-      print("  font size: {}".format(fontsize))
-        
-      for i,filename in reversed(list(enumerate(available_files))):
-        
-        t = parse.get_date_from_filename(filename)
-        text = parse.get_readable_date(t)
-        
-        key_index = len(available_files)-i-1
-        
-        if key_index < 10:
-          text_list += "{}. {}\n".format(key_index, text)
-        
-      # show progress bar and the word "Pause" or "Weiter"
-      show_overlay.show_overlay_text(text_list, 10, fontsize=fontsize)
-    
     elif event.scan_code == 83:  # ","
       print("load livestream", flush=True)
       
       # show text
-      show_overlay.show_overlay_text("Livestream", 5)
+      show_overlay.show_overlay_text("Livestream", 10)
       
       # start chrome with live stream
       show_livestream()
@@ -177,7 +157,7 @@ def key_pressed(event):
         print("  File \"{}\", date {}".format(selected_filename, text), flush=True)
         
         # show text 
-        show_overlay.show_overlay_text(text, 5)
+        show_overlay.show_overlay_text(text, 10)
         
         # open the video stream in vlc
         open_stream(selected_filename)
@@ -270,6 +250,37 @@ def show_livestream():
   print("  Click")
   pyautogui.click()
   
+  # move mouse away again
+  pyautogui.moveTo(1,1)
+  
+def show_info(duration):
+
+  available_files = parse.get_available_files()
+  
+  text_list = ""
+  fontsize = 100
+  max_key = min(9,len(available_files))
+  text_list = "Eine Taste von 0 bis {} drücken:\n".format(max_key)
+  
+  print("  n:",len(available_files), flush=True)
+  if len(available_files) > 5:
+    fontsize = 50
+    
+  print("  font size: {}".format(fontsize))
+    
+  for i,filename in reversed(list(enumerate(available_files))):
+    
+    t = parse.get_date_from_filename(filename)
+    text = parse.get_readable_date(t)
+    
+    key_index = len(available_files)-i-1
+    
+    if key_index < 10:
+      text_list += "{}. {}\n".format(key_index, text)
+    
+  # show the list on the screen
+  show_overlay.show_overlay_text(text_list, duration, fontsize=fontsize)
+
           
 # start of the script
 print("streambox.py started", flush=True)
@@ -296,15 +307,11 @@ vlc_instance = vlc.Instance()
 # create a media player 
 media_player = vlc_instance.media_player_new() 
   
-# creating the media 
-#media = vlc_instance.media_new(source)
-  
-# assign media to the player
-#media_player.set_media(media) 
-  
-# play the video
-#media_player.play() 
-#media_player.set_fullscreen(True)
+# move mouse away
+pyautogui.moveTo(1,1)
+
+# initially show list of available videos
+show_info(15)
   
 try:
   
