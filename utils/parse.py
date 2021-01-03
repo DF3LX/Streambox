@@ -11,6 +11,7 @@ import urllib3
 import humanize
 import vlc
 import subprocess
+import time
 
 # determine installation directory of Streambox, regardless of current working directory
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -89,6 +90,16 @@ def parse_online_list():
     pos = html_text.find("</tr>", pos)
 
   return filenames
+  
+def download_new_videos_loop():
+  """
+  Call download_new_videos() in an inifinte loop.
+  """
+  
+  while True:
+    download_new_videos()
+    time.sleep(60*60)
+    #time.sleep(120)
   
 def download_new_videos():
   """
