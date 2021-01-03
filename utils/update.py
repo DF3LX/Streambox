@@ -43,8 +43,8 @@ def apply_updates():
     
   # determine hash of currently checked out version
   new_hash = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=install_dir)
-  new_hash = current_hash.strip()   # remove whitespace
-  new_hash = current_hash.decode("utf-8")
+  new_hash = new_hash.strip()   # remove whitespace
+  new_hash = new_hash.decode("utf-8")
   
   print("--------------------------\n\033[92mgit checkout main\033[0m")
   print(str(output_checkout_main))
