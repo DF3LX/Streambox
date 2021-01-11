@@ -91,60 +91,40 @@ def key_pressed(event):
     elif event.name == "+":
       print("jump forward", flush=True)
       current_time = media_player.get_time()  # in ms
-      new_time = current_time + 10000
+      new_time = current_time + 60000
       media_player.set_time(new_time) # in ms
       
       # show progress bar 
-      show_overlay.show_video_progress(media_player, "+10s", 2)
+      show_overlay.show_video_progress(media_player, "+1 min", 2)
     
     elif event.name == "-":
       print("jump backwards", flush=True)
       current_time = media_player.get_time()  # in ms
-      media_player.set_time(current_time - 10000) # in ms
+      media_player.set_time(current_time - 60000) # in ms
       
       # show progress bar 
-      show_overlay.show_video_progress(media_player, "-10s", 2)
+      show_overlay.show_video_progress(media_player, "-1 min", 2)
     
     elif event.name == "enter" or event.scan_code == 96:
       print("show info", flush=True)
       
-      available_files = parse.get_available_files()
+      # show the list of available files for 10s
+      show_info(10)
       
-      text_list = ""
-      fontsize = 100
-      print("  n:",len(available_files), flush=True)
-      if len(available_files) > 5:
-        fontsize = 50
-        
-      print("  font size: {}".format(fontsize))
-        
-      for i,filename in reversed(list(enumerate(available_files))):
-        
-        t = parse.get_date_from_filename(filename)
-        text = parse.get_readable_date(t)
-        
-        key_index = len(available_files)-i-1
-        
-        if key_index < 10:
-          text_list += "{}. {}\n".format(key_index, text)
-        
-      # show progress bar and the word "Pause" or "Weiter"
-      show_overlay.show_overlay_text(text_list, 10, fontsize=fontsize)
-    
     elif event.scan_code == 83:  # ","
-      print("load current stream", flush=True)
-      # get all available videos
-      livestream_url = ""
+      print("load livestream", flush=True)
       
+      # show text
+      show_overlay.show_overlay_text("Livestream", 10)
+      
+      # start chrome with live stream
       show_livestream()
       show_webcam = False
       
     elif event.scan_code == 55:  # "snowflake"
       print("snowflake", flush=True)
       url = "https://golf-alvaneu.ch/livecam/webcam.jpg"
-      
-      #open_stream(url)
-      
+            
       # download image
       r = requests.get(url, verify=False, stream=True)
       r.raw.decode_content = True
@@ -177,7 +157,7 @@ def key_pressed(event):
         print("  File \"{}\", date {}".format(selected_filename, text), flush=True)
         
         # show text 
-        show_overlay.show_overlay_text(text, 5)
+        show_overlay.show_overlay_text(text, 10)
         
         # open the video stream in vlc
         open_stream(selected_filename)
@@ -196,20 +176,57 @@ def key_pressed(event):
 def open_stream(source):
   print("- Play \"{}\"".format(source), flush=True)
   try:
+    # kill chromium-browser that shows livestream
+    try:
+      subprocess.Popen("killall -9 /usr/lib/chromium-browser/chromium-browser-v7", shell=True)
+    except:
+      pass
+    
     # load media
     media = vlc_instance.media_new(source)
     media_player.set_media(media) 
             
     # play the video
     media_player.play() 
+    
+    # fullscreen does not work with the text overlay for "fast forward", "pause" etc.
     #media_player.set_fullscreen(True)
     media_player.set_fullscreen(False)
-    media_player.video_set_scale(0)   # 0 means adjust to fit
-
-    # get information about the video
+    #media_player.video_set_scale(0)   # 0 means adjust to fit
+    
+    # wait for video to have started
+    time.sleep(3)
+  
+    # get screen resolution
+    screen_width, screen_height = pyautogui.size()
+  
+    # get size information about the video
     duration = media_player.get_length() 
-    size = media_player.video_get_size() 
-    print("- Play \"{}\", duration: {}s, size: {}".format(source, duration, size), flush=True)
+    video_width, video_height = media_player.video_get_size() 
+    
+    # compute scaling factors for video player depending on video size and screen size
+    scaling_factor_x = screen_width / video_width
+    scaling_factor_y = screen_height / video_height
+    scaling_factor = min(scaling_factor_x, scaling_factor_y)
+    
+    # output values
+    print("- Play \"{}\", duration: {}s".format(source, duration), flush=True)
+    print("  Video: {} x {}".format(video_width, video_height), flush=True)
+    print("  screen: {} x {}".format(screen_width, screen_height), flush=True)
+    print("  scaling factor: {} x {} -> {}".format(scaling_factor_x, scaling_factor_y, scaling_factor), flush=True)
+    
+    # set scaling factor for video player
+    media_player.video_set_scale(scaling_factor)
+    
+    # wait for video to have started
+    time.sleep(1)
+    
+    # restart vlc, because the first time it does not always work with the scaling
+    media_player.stop() 
+    media_player.play() 
+    
+    # set scaling factor for video player again
+    media_player.video_set_scale(scaling_factor)
 
   except Exception as e:
     print(e, flush=True)
@@ -233,6 +250,37 @@ def show_livestream():
   print("  Click")
   pyautogui.click()
   
+  # move mouse away again
+  pyautogui.moveTo(1,1)
+  
+def show_info(duration):
+
+  available_files = parse.get_available_files()
+  
+  text_list = ""
+  fontsize = 100
+  max_key = min(9,len(available_files))
+  text_list = "Eine Taste von 0 bis {} drücken:\n".format(max_key)
+  
+  print("  n:",len(available_files), flush=True)
+  if len(available_files) > 5:
+    fontsize = 50
+    
+  print("  font size: {}".format(fontsize))
+    
+  for i,filename in reversed(list(enumerate(available_files))):
+    
+    t = parse.get_date_from_filename(filename)
+    text = parse.get_readable_date(t)
+    
+    key_index = len(available_files)-i-1
+    
+    if key_index < 10:
+      text_list += "{}. {}\n".format(key_index, text)
+    
+  # show the list on the screen
+  show_overlay.show_overlay_text(text_list, duration, fontsize=fontsize)
+
           
 # start of the script
 print("streambox.py started", flush=True)
@@ -250,8 +298,8 @@ except:
   print("Could not start thread to download new videos.", flush=True)
           
 # register callback
-keyboard.on_press(key_pressed)
-#keyboard.on_release(key_released)
+#keyboard.on_press(key_pressed)
+keyboard.on_release(key_pressed)
 
 # create a vlc instance 
 vlc_instance = vlc.Instance() 
@@ -259,15 +307,11 @@ vlc_instance = vlc.Instance()
 # create a media player 
 media_player = vlc_instance.media_player_new() 
   
-# creating the media 
-#media = vlc_instance.media_new(source)
-  
-# assign media to the player
-#media_player.set_media(media) 
-  
-# play the video
-#media_player.play() 
-#media_player.set_fullscreen(True)
+# move mouse away (to left boundary)
+pyautogui.moveTo(1,100)
+
+# initially show list of available videos
+show_info(15)
   
 try:
   
