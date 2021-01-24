@@ -33,7 +33,7 @@ plt.rcParams["figure.facecolor"] = "black"
 plt.rcParams["toolbar"] = "None"
 
 # scripts in utils directory
-current_dir = os.path.dirname(os.showpath.realpath(__file__))
+current_dir = os.path.dirname(os.path.realpath(__file__))
 utils_dir = os.path.join(current_dir, "utils")
 sys.path.append(utils_dir)
 import update
