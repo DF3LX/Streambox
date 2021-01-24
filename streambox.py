@@ -11,7 +11,7 @@
 #
 # Notes
 # set audio output: right-click on audio icon and select HDMI
-pöüqnfainea
+
 import sys, os
 import time
 import vlc
@@ -314,7 +314,7 @@ pyautogui.moveTo(1,100)
 show_info(15)
   
 try:
-  
+  pöüqnfainea
   # main loop
   while True:
     if show_webcam:
