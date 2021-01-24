@@ -260,7 +260,7 @@ def show_info(duration):
   text_list = ""
   fontsize = 100
   max_key = min(9,len(available_files))
-  text_list = "Taste . (Punkt) drücken für Livestream, oder\neine Taste von 0 bis {} drücken:\n".format(max_key)
+  text_list = "Taste . (Punkt) drücken für Livestream,\neine Taste von 0 bis {} drücken:\n".format(max_key)
   
   print("  n:",len(available_files), flush=True)
   if len(available_files) > 5:
@@ -314,7 +314,6 @@ pyautogui.moveTo(1,100)
 show_info(15)
   
 try:
-  uefgnan
   # main loop
   while True:
     if show_webcam:
