@@ -11,7 +11,7 @@
 #
 # Notes
 # set audio output: right-click on audio icon and select HDMI
-
+pöüqnfainea
 import sys, os
 import time
 import vlc
