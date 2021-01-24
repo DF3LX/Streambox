@@ -307,8 +307,8 @@ vlc_instance = vlc.Instance()
 # create a media player 
 media_player = vlc_instance.media_player_new() 
   
-# move mouse away
-pyautogui.moveTo(1,1)
+# move mouse away (to left boundary)
+pyautogui.moveTo(1,100)
 
 # initially show list of available videos
 show_info(15)
