@@ -16,6 +16,10 @@ def apply_updates():
   """
   print("- apply_updates() started at {}".format(datetime.datetime.today().strftime('%d.%m.%Y %H:%M:%S')), flush=True)
 
+  if os.path.exists("NO_UPDATE"):
+    print("No update file exists!")
+    return
+
   # determine installation directory of Streambox, regardless of current working directory
   current_dir = os.path.dirname(os.path.realpath(__file__))
   install_dir = os.path.join(current_dir, "..")
@@ -52,3 +56,15 @@ def apply_updates():
     sys.exit(0)
   else:
     print("  Version is up to date.", flush=True)
+
+def revert(s):
+  
+  # checkout v0
+  output1 = subprocess.check_output(["git", "checkout", "v0"], cwd=install_dir)
+  output2 = subprocess.check_output(["git", "reset", "--hard"], cwd=install_dir)
+  
+  with open("NO_UPDATE", "w") as f:
+    f.write("revert to v0 at {}\n".format(str(datetime.datetime.now())))
+    f.write(s)
+  
+  
